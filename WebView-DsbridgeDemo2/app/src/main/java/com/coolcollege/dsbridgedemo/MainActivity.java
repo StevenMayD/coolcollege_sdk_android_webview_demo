@@ -10,7 +10,10 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.webkit.JavascriptInterface;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -57,7 +60,7 @@ public class MainActivity extends Activity {
 
         settingsWebView();
 
-        DWebView.setWebContentsDebuggingEnabled(true);
+        DWebView.setWebContentsDebuggingEnabled(false); // 关闭webview调试模式（否则找不到交互方法会弹框提醒）
 
 //        webView.addJavascriptObject(new DsbridgeJsApi(MainActivity.this),"local");
 //        webView.addJavascriptObject(new DsbridgeJsApi(MainActivity.this),"navigation");
@@ -68,7 +71,21 @@ public class MainActivity extends Activity {
         webView.addJavascriptObject(this,"");
         webView.addJavascriptObject(this,"util"); // scan交互的命名空间
 
-        webView.loadUrl("https://sdn.coolcollege.cn/assets/h5-photo-camera/index.html");
+//        webView.loadUrl("https://sdn.coolcollege.cn/assets/h5-photo-camera/index.html");
+        webView.loadUrl("https://app.coolcollege.cn?token=zKpCwDQMivdtzA6VDdCWy0bdhwd7R0/HjTM63bzx3cBjyUwbws0l51sNrcFZwIkb"); // 线上企业
+
+        // 重写WebViewClient（否则webview的访问意图对象会被拒绝）
+        webView.setWebViewClient(new WebViewClient(){
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                return super.shouldOverrideUrlLoading(view, url);
+            }
+
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                return super.shouldOverrideUrlLoading(view, request);
+            }
+        });
     }
 
     @JavascriptInterface
