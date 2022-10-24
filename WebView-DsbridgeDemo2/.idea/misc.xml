@@ -3,12 +3,15 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="../../../../../../../.gradle/caches/transforms-2/files-2.1/60dd5518db61c4428c1a4eecb44febf9/jetified-kxy/res/layout/k_activity_qrcode_scan.xml" value="0.25416666666666665" />
         <entry key="..\:/Android/Demo/DsbridgeDemo2/app/src/main/res/layout/ac_d_webview.xml" value="0.17603850050658562" />
         <entry key="..\:/Android/Demo/DsbridgeDemo2/app/src/main/res/layout/ac_d_webview1.xml" value="0.3619791666666667" />
+        <entry key="app/src/main/res/layout/ac_d_webview.xml" value="0.34791666666666665" />
+        <entry key="app/src/main/res/layout/ac_d_webview1.xml" value="0.34791666666666665" />
       </map>
     </option>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" project-jdk-name="11" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="11" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>
   <component name="ProjectType">

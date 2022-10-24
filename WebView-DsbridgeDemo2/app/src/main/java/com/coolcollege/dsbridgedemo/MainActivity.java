@@ -66,6 +66,7 @@ public class MainActivity extends Activity {
         webView.addJavascriptObject(this,"local");
         webView.addJavascriptObject(this,"navigation");
         webView.addJavascriptObject(this,"");
+        webView.addJavascriptObject(this,"util"); // scan交互的命名空间
 
         webView.loadUrl("https://sdn.coolcollege.cn/assets/h5-photo-camera/index.html");
     }
@@ -74,6 +75,36 @@ public class MainActivity extends Activity {
     public void nativeEvent(Object msg, CompletionHandler<String> handler){
         Log.e("msg",""+ msg);
         NativeEventParams params = new Gson().fromJson(msg.toString(), NativeEventParams.class);
+        APIModule.getAPIModule(this).moduleManage(params, acToken, entId, 123, new KXYCallback() {
+            @Override
+            public void onOKCallback(Object o) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        ToastUtil.showToast(new Gson().toJson(o));
+                    }
+                });
+            }
+
+            @Override
+            public void onErrorCallback(Object o) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        ToastUtil.showToast(new Gson().toJson(o));
+                    }
+                });
+            }
+        });
+    }
+
+    // 交互方法添加 @JavascriptInterface
+    @JavascriptInterface
+    public void scan(Object msg, CompletionHandler<String> handler){
+        Log.e("msg",""+ msg);
+        NativeEventParams params = new NativeEventParams();
+        params.methodName = "scan";
+        params.methodData = "{}";
         APIModule.getAPIModule(this).moduleManage(params, acToken, entId, 123, new KXYCallback() {
             @Override
             public void onOKCallback(Object o) {
@@ -141,6 +172,8 @@ public class MainActivity extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (data == null) return;
-        ToastUtil.showToast(new Gson().toJson(data.getParcelableExtra(MediaSelector.RESULT_DATA) != null ? data.getParcelableExtra(MediaSelector.RESULT_DATA) : data.getParcelableArrayListExtra(MediaSelector.RESULT_DATA)));
+        String text = new Gson().toJson(data.getParcelableExtra(MediaSelector.RESULT_DATA) != null ? data.getParcelableExtra(MediaSelector.RESULT_DATA) : data.getParcelableArrayListExtra(MediaSelector.RESULT_DATA));
+        text = (text != null && !("null".equals(text)))?text:data.getStringExtra(MediaSelector.RESULT_DATA);
+        ToastUtil.showToast(text);
     }
 }
