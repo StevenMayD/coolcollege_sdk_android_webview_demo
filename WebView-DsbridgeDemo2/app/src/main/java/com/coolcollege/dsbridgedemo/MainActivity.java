@@ -26,6 +26,8 @@ import com.coolcollege.aar.selector.MediaSelector;
 import com.coolcollege.aar.utils.ToastUtil;
 import com.google.gson.Gson;
 
+import java.util.HashMap;
+
 import wendu.dsbridge.CompletionHandler;
 import wendu.dsbridge.DWebView;
 import wendu.dsbridge.OnReturnValue;
@@ -36,6 +38,7 @@ public class MainActivity extends Activity {
     public DWebView webView;
     private String acToken = "af0e91b07e9a4887a9f3d895fc80c732";
     private String entId = "1067985194709028888";
+    CompletionHandler<String> theHandler = null;
 
     private Utils.ActivityLifecycleCallbacks activityLifecycleCallbacks = new Utils.ActivityLifecycleCallbacks() {
         @Override
@@ -90,15 +93,19 @@ public class MainActivity extends Activity {
 
     @JavascriptInterface
     public void nativeEvent(Object msg, CompletionHandler<String> handler){
-        Log.e("msg",""+ msg);
+        theHandler = handler;
         NativeEventParams params = new Gson().fromJson(msg.toString(), NativeEventParams.class);
         APIModule.getAPIModule(this).moduleManage(params, acToken, entId, 123, new KXYCallback() {
+            // 不需要跳转页面的回调：通用上传uploadFile
             @Override
             public void onOKCallback(Object o) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         ToastUtil.showToast(new Gson().toJson(o));
+                        HashMap<String, Object> params = new HashMap<>();
+                        params.put("result", o);
+                        theHandler.complete(new Gson().toJson(params)); // uploadFile ok
                     }
                 });
             }
@@ -109,6 +116,10 @@ public class MainActivity extends Activity {
                     @Override
                     public void run() {
                         ToastUtil.showToast(new Gson().toJson(o));
+                        HashMap<String, Object> params = new HashMap<>();
+                        params.put("isError", true);
+                        params.put("error", o);
+                        theHandler.complete(new Gson().toJson(params));
                     }
                 });
             }
@@ -118,7 +129,7 @@ public class MainActivity extends Activity {
     // 交互方法添加 @JavascriptInterface
     @JavascriptInterface
     public void scan(Object msg, CompletionHandler<String> handler){
-        Log.e("msg",""+ msg);
+        theHandler = handler;
         NativeEventParams params = new NativeEventParams();
         params.methodName = "scan";
         params.methodData = "{}";
@@ -129,6 +140,9 @@ public class MainActivity extends Activity {
                     @Override
                     public void run() {
                         ToastUtil.showToast(new Gson().toJson(o));
+                        HashMap<String, Object> params = new HashMap<>();
+                        params.put("result", o);
+                        theHandler.complete(new Gson().toJson(params));
                     }
                 });
             }
@@ -139,6 +153,10 @@ public class MainActivity extends Activity {
                     @Override
                     public void run() {
                         ToastUtil.showToast(new Gson().toJson(o));
+                        HashMap<String, Object> params = new HashMap<>();
+                        params.put("isError", true);
+                        params.put("error", o);
+                        theHandler.complete(new Gson().toJson(params));
                     }
                 });
             }
@@ -186,11 +204,30 @@ public class MainActivity extends Activity {
     }
 
     @Override
+    // 需要跳转页面的回调：扫码、选择图片
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (data == null) return;
-        String text = new Gson().toJson(data.getParcelableExtra(MediaSelector.RESULT_DATA) != null ? data.getParcelableExtra(MediaSelector.RESULT_DATA) : data.getParcelableArrayListExtra(MediaSelector.RESULT_DATA));
-        text = (text != null && !("null".equals(text)))?text:data.getStringExtra(MediaSelector.RESULT_DATA);
-        ToastUtil.showToast(text);
+
+        Object obj1 = data.getParcelableArrayListExtra(MediaSelector.RESULT_DATA); // chooseImage 返回ArrayList 否则null
+        Object obj2 = data.getStringExtra(MediaSelector.RESULT_DATA); // scan 返回String:https://mobile.coolcollege.cn/assets-share.html?short_link=https%3A%2F%2Fct12coolapi.coolcollege.cn%2Fenterprise-manage-api%2Fr%2F5520&eid=951057547274620933  否则null
+        Object obj3 = data.getParcelableExtra(MediaSelector.RESULT_DATA); // null
+
+        HashMap<String, Object> params = new HashMap<>();
+        String text = null;
+        if (obj1 != null) {
+            params.put("result", obj1); // chooseImage ok
+            text = new Gson().toJson(obj1);
+        } else if (obj2 != null) {
+            params.put("result", obj2);  // scan ok
+            text = new Gson().toJson(obj2);
+        } else if (obj3 != null) {
+            params.put("result", obj3);
+            text = new Gson().toJson(obj3);
+        }
+        // 交互回调
+        if (params.get("result") != null) { theHandler.complete(new Gson().toJson(params)); }
+        // 页面弹窗
+        if (text != null) { ToastUtil.showToast(text); }
     }
 }
