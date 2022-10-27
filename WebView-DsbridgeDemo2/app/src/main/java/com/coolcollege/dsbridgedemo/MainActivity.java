@@ -36,7 +36,6 @@ import wendu.dsbridge.OnReturnValue;
 public class MainActivity extends Activity {
 
     public DWebView webView;
-    private String acToken = "af0e91b07e9a4887a9f3d895fc80c732";
     private String entId = "1067985194709028888";
     CompletionHandler<String> theHandler = null;
 
@@ -95,7 +94,7 @@ public class MainActivity extends Activity {
     public void nativeEvent(Object msg, CompletionHandler<String> handler){
         theHandler = handler;
         NativeEventParams params = new Gson().fromJson(msg.toString(), NativeEventParams.class);
-        APIModule.getAPIModule(this).moduleManage(params, acToken, entId, 123, new KXYCallback() {
+        APIModule.getAPIModule(this).moduleManage(params, entId, 123, new KXYCallback() {
             // 不需要跳转页面的回调：通用上传uploadFile
             @Override
             public void onOKCallback(Object o) {
@@ -133,7 +132,7 @@ public class MainActivity extends Activity {
         NativeEventParams params = new NativeEventParams();
         params.methodName = "scan";
         params.methodData = "{}";
-        APIModule.getAPIModule(this).moduleManage(params, acToken, entId, 123, new KXYCallback() {
+        APIModule.getAPIModule(this).moduleManage(params, entId, 123, new KXYCallback() {
             @Override
             public void onOKCallback(Object o) {
                 runOnUiThread(new Runnable() {
