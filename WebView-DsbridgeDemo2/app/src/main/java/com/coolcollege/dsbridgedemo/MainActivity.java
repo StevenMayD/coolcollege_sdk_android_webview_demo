@@ -10,11 +10,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.webkit.JavascriptInterface;
-import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
@@ -25,12 +21,14 @@ import com.coolcollege.aar.module.APIModule;
 import com.coolcollege.aar.selector.MediaSelector;
 import com.coolcollege.aar.utils.ToastUtil;
 import com.google.gson.Gson;
+import com.tencent.smtt.export.external.interfaces.WebResourceRequest;
+import com.tencent.smtt.sdk.WebView;
+import com.tencent.smtt.sdk.WebViewClient;
 
 import java.util.HashMap;
 
 import wendu.dsbridge.CompletionHandler;
 import wendu.dsbridge.DWebView;
-import wendu.dsbridge.OnReturnValue;
 
 
 public class MainActivity extends Activity {
@@ -70,22 +68,21 @@ public class MainActivity extends Activity {
 
         webView.addJavascriptObject(this,"local");
         webView.addJavascriptObject(this,"navigation");
-        webView.addJavascriptObject(this,"");
         webView.addJavascriptObject(this,"util"); // scan交互的命名空间
 
-//        webView.loadUrl("https://sdn.coolcollege.cn/assets/h5-photo-camera/index.html");
+//        webView.loadUrl("https://sdn.coolcollege.cn/assets/h5-photo-camera/index.html"); // 前端demo页
         webView.loadUrl("https://app.coolcollege.cn?token=zKpCwDQMivdtzA6VDdCWy0bdhwd7R0/HjTM63bzx3cBjyUwbws0l51sNrcFZwIkb"); // 线上企业
 
         // 重写WebViewClient（否则webview的访问意图对象会被拒绝）
         webView.setWebViewClient(new WebViewClient(){
             @Override
-            public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                return super.shouldOverrideUrlLoading(view, url);
+            public boolean shouldOverrideUrlLoading(WebView webView, String s) {
+                return super.shouldOverrideUrlLoading(webView, s);
             }
 
             @Override
-            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                return super.shouldOverrideUrlLoading(view, request);
+            public boolean shouldOverrideUrlLoading(WebView webView, WebResourceRequest webResourceRequest) {
+                return super.shouldOverrideUrlLoading(webView, webResourceRequest);
             }
         });
     }
@@ -174,7 +171,7 @@ public class MainActivity extends Activity {
         } else {
             webView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
         }
-        WebSettings settings = webView.getSettings();
+        com.tencent.smtt.sdk.WebSettings settings = webView.getSettings();
         settings.setDomStorageEnabled(true);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             settings.setMediaPlaybackRequiresUserGesture(false);
