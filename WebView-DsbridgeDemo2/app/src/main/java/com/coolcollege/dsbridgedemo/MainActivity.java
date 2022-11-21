@@ -10,7 +10,10 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.webkit.JavascriptInterface;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
 import androidx.annotation.NonNull;
 
@@ -20,15 +23,17 @@ import com.coolcollege.aar.callback.KXYCallback;
 import com.coolcollege.aar.module.APIModule;
 import com.coolcollege.aar.selector.MediaSelector;
 import com.coolcollege.aar.utils.ToastUtil;
+import com.coolcollege.dsbridgedemo.dsbridge.main.java.wendu.dsbridge.CompletionHandler;
+import com.coolcollege.dsbridgedemo.dsbridge.main.java.wendu.dsbridge.DWebView;
 import com.google.gson.Gson;
-import com.tencent.smtt.export.external.interfaces.WebResourceRequest;
-import com.tencent.smtt.sdk.WebView;
-import com.tencent.smtt.sdk.WebViewClient;
+//import com.tencent.smtt.export.external.interfaces.WebResourceRequest;
+//import com.tencent.smtt.sdk.WebView;
+//import com.tencent.smtt.sdk.WebViewClient;
 
 import java.util.HashMap;
 
-import wendu.dsbridge.CompletionHandler;
-import wendu.dsbridge.DWebView;
+//import wendu.dsbridge.CompletionHandler;
+//import wendu.dsbridge.DWebView;
 
 
 public class MainActivity extends Activity {
@@ -76,13 +81,13 @@ public class MainActivity extends Activity {
         // 重写WebViewClient（否则webview的访问意图对象会被拒绝）
         webView.setWebViewClient(new WebViewClient(){
             @Override
-            public boolean shouldOverrideUrlLoading(WebView webView, String s) {
-                return super.shouldOverrideUrlLoading(webView, s);
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                return super.shouldOverrideUrlLoading(view, url);
             }
 
             @Override
-            public boolean shouldOverrideUrlLoading(WebView webView, WebResourceRequest webResourceRequest) {
-                return super.shouldOverrideUrlLoading(webView, webResourceRequest);
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                return super.shouldOverrideUrlLoading(view, request);
             }
         });
     }
@@ -171,7 +176,7 @@ public class MainActivity extends Activity {
         } else {
             webView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
         }
-        com.tencent.smtt.sdk.WebSettings settings = webView.getSettings();
+        WebSettings settings = webView.getSettings();
         settings.setDomStorageEnabled(true);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             settings.setMediaPlaybackRequiresUserGesture(false);

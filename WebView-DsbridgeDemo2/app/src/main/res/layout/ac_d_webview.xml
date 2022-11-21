@@ -3,11 +3,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <wendu.dsbridge.DWebView
+    <com.coolcollege.dsbridgedemo.dsbridge.main.java.wendu.dsbridge.DWebView
         android:id="@+id/webview"
         android:layout_below="@+id/progressBar"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
-
 
 </LinearLayout>

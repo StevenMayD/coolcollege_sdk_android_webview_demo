@@ -5,7 +5,9 @@ import android.util.Log;
 import android.webkit.JavascriptInterface;
 import android.widget.Toast;
 
-import wendu.dsbridge.CompletionHandler;
+import com.coolcollege.dsbridgedemo.dsbridge.main.java.wendu.dsbridge.CompletionHandler;
+
+//import wendu.dsbridge.CompletionHandler;
 
 public class DsbridgeJsApi {
     public Context mContext;
