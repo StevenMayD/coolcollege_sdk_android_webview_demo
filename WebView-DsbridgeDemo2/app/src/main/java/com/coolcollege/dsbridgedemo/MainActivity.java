@@ -70,7 +70,7 @@ public class MainActivity extends Activity {
         webView.addJavascriptObject(this,"local");
         webView.addJavascriptObject(this,"navigation");
         webView.addJavascriptObject(this,"util"); // scan交互的命名空间
-        webView.addJavascriptObject(this,"device"); // scan交互的命名空间
+        webView.addJavascriptObject(this,"device"); // 获取前、后台状态 交互的命名空间
 
         ActivityUtils.addActivityLifecycleCallbacks(this, activityLifecycleCallbacks);
 
