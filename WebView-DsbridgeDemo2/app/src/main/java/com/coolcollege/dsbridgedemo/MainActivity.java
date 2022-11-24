@@ -14,6 +14,7 @@ import android.webkit.WebSettings;
 
 import androidx.annotation.NonNull;
 
+import com.blankj.utilcode.util.ActivityUtils;
 import com.blankj.utilcode.util.Utils;
 import com.coolcollege.aar.bean.NativeEventParams;
 import com.coolcollege.aar.callback.KXYCallback;
@@ -34,20 +35,20 @@ import wendu.dsbridge.DWebView;
 public class MainActivity extends Activity {
 
     public DWebView webView;
-    private String entId = "1067985194709028888";
+    private String entId = "1325057187583758354";
     CompletionHandler<String> theHandler = null;
 
     private Utils.ActivityLifecycleCallbacks activityLifecycleCallbacks = new Utils.ActivityLifecycleCallbacks() {
         @Override
         public void onActivityResumed(@NonNull Activity activity) {
             super.onActivityResumed(activity);
-            Log.e("onActiveChange", "foreground-");
+            webView.callHandler("device.onActiveChange", new Object[]{"foreground"}, null);
         }
 
         @Override
         public void onActivityPaused(@NonNull Activity activity) {
             super.onActivityPaused(activity);
-            Log.e("onActiveChange", "background-");
+            webView.callHandler("device.onActiveChange", new Object[]{"background"}, null);
         }
     };
 
@@ -69,9 +70,12 @@ public class MainActivity extends Activity {
         webView.addJavascriptObject(this,"local");
         webView.addJavascriptObject(this,"navigation");
         webView.addJavascriptObject(this,"util"); // scan交互的命名空间
+        webView.addJavascriptObject(this,"device"); // scan交互的命名空间
+
+        ActivityUtils.addActivityLifecycleCallbacks(this, activityLifecycleCallbacks);
 
 //        webView.loadUrl("https://sdn.coolcollege.cn/assets/h5-photo-camera/index.html"); // 前端demo页
-        webView.loadUrl("https://app.coolcollege.cn?token=zKpCwDQMivdtzA6VDdCWy0bdhwd7R0/HjTM63bzx3cBjyUwbws0l51sNrcFZwIkb"); // 线上企业
+        webView.loadUrl("https://app.coolcollege.cn?token=mkdT/mcuWn7J+IrhiJwSRLnru2pSHgntPKo3hO/OOaoIopPkupBBc8M+G3sF1ObrGWW/BpGLs8zp6jo2rkTRpw=="); // 线上企业
 
         // 重写WebViewClient（否则webview的访问意图对象会被拒绝）
         webView.setWebViewClient(new WebViewClient(){
@@ -157,6 +161,11 @@ public class MainActivity extends Activity {
                 });
             }
         });
+    }
+
+    @JavascriptInterface
+    public void onActiveChange(Object data, CompletionHandler handler) {
+        handler.complete(data);
     }
 
     private void settingsWebView() {
