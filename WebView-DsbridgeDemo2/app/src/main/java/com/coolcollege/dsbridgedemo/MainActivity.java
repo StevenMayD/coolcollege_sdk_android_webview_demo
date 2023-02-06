@@ -15,6 +15,8 @@ import android.webkit.WebSettings;
 import androidx.annotation.NonNull;
 
 import com.blankj.utilcode.util.ActivityUtils;
+import com.blankj.utilcode.util.DeviceUtils;
+import com.blankj.utilcode.util.ScreenUtils;
 import com.blankj.utilcode.util.Utils;
 import com.coolcollege.aar.bean.NativeEventParams;
 import com.coolcollege.aar.callback.KXYCallback;
@@ -28,6 +30,7 @@ import com.tencent.smtt.sdk.WebViewClient;
 
 import java.util.HashMap;
 
+import application.MyApplication;
 import wendu.dsbridge.CompletionHandler;
 import wendu.dsbridge.DWebView;
 
@@ -70,7 +73,7 @@ public class MainActivity extends Activity {
         webView.addJavascriptObject(this,"local");
         webView.addJavascriptObject(this,"navigation");
         webView.addJavascriptObject(this,"util"); // scan交互的命名空间
-        webView.addJavascriptObject(this,"device"); // 获取前、后台状态 交互的命名空间
+        webView.addJavascriptObject(this,"device"); // 获取前、后台状态/手机系统信息 交互的命名空间
 
         ActivityUtils.addActivityLifecycleCallbacks(this, activityLifecycleCallbacks);
 
@@ -95,7 +98,7 @@ public class MainActivity extends Activity {
     public void nativeEvent(Object msg, CompletionHandler<String> handler){
         theHandler = handler;
         NativeEventParams params = new Gson().fromJson(msg.toString(), NativeEventParams.class);
-        APIModule.getAPIModule(this).moduleManage(params, entId, 123, new KXYCallback() {
+        APIModule.getAPIModule(this, MyApplication.get()).moduleManage(params, entId, 123, new KXYCallback() {
             // 不需要跳转页面的回调：通用上传uploadFile
             @Override
             public void onOKCallback(Object o) {
@@ -133,7 +136,7 @@ public class MainActivity extends Activity {
         NativeEventParams params = new NativeEventParams();
         params.methodName = "scan";
         params.methodData = "{}";
-        APIModule.getAPIModule(this).moduleManage(params, entId, 123, new KXYCallback() {
+        APIModule.getAPIModule(this, MyApplication.get()).moduleManage(params, entId, 123, new KXYCallback() {
             @Override
             public void onOKCallback(Object o) {
                 runOnUiThread(new Runnable() {
@@ -168,6 +171,41 @@ public class MainActivity extends Activity {
         handler.complete(data);
     }
 
+    @JavascriptInterface
+    public void getSystemInfo(Object data, CompletionHandler handler) {
+        theHandler = handler;
+        NativeEventParams params = new NativeEventParams();
+        params.methodName = "getSystemInfo";
+        params.methodData = "{}";
+        APIModule.getAPIModule(this, MyApplication.get()).moduleManage(params, entId, 123, new KXYCallback() {
+            @Override
+            public void onOKCallback(Object o) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        ToastUtil.showToast(new Gson().toJson(o));
+                        HashMap<String, Object> params = new HashMap<>();
+                        params.put("result", o);
+                        theHandler.complete(new Gson().toJson(params));
+                    }
+                });
+            }
+
+            @Override
+            public void onErrorCallback(Object o) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        ToastUtil.showToast(new Gson().toJson(o));
+                        HashMap<String, Object> params = new HashMap<>();
+                        params.put("isError", true);
+                        params.put("error", o);
+                        theHandler.complete(new Gson().toJson(params));
+                    }
+                });
+            }
+        });
+    }
     private void settingsWebView() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             webView.setWebContentsDebuggingEnabled(true);
