@@ -17,6 +17,9 @@ import android.webkit.WebViewClient;
 
 import androidx.annotation.NonNull;
 
+import com.blankj.utilcode.util.ActivityUtils;
+import com.blankj.utilcode.util.DeviceUtils;
+import com.blankj.utilcode.util.ScreenUtils;
 import com.blankj.utilcode.util.Utils;
 import com.coolcollege.aar.bean.NativeEventParams;
 import com.coolcollege.aar.callback.KXYCallback;
@@ -34,25 +37,26 @@ import java.util.HashMap;
 
 //import wendu.dsbridge.CompletionHandler;
 //import wendu.dsbridge.DWebView;
+import application.MyApplication;
 
 
 public class MainActivity extends Activity {
 
     public DWebView webView;
-    private String entId = "1067985194709028888";
+    private String entId = "1324923316665978965";
     CompletionHandler<String> theHandler = null;
 
     private Utils.ActivityLifecycleCallbacks activityLifecycleCallbacks = new Utils.ActivityLifecycleCallbacks() {
         @Override
         public void onActivityResumed(@NonNull Activity activity) {
             super.onActivityResumed(activity);
-            Log.e("onActiveChange", "foreground-");
+            webView.callHandler("device.onActiveChange", new Object[]{"foreground"}, null);
         }
 
         @Override
         public void onActivityPaused(@NonNull Activity activity) {
             super.onActivityPaused(activity);
-            Log.e("onActiveChange", "background-");
+            webView.callHandler("device.onActiveChange", new Object[]{"background"}, null);
         }
     };
 
@@ -74,8 +78,15 @@ public class MainActivity extends Activity {
         webView.addJavascriptObject(this,"local");
         webView.addJavascriptObject(this,"navigation");
         webView.addJavascriptObject(this,"util"); // scan交互的命名空间
+        webView.addJavascriptObject(this,"device"); // 获取前、后台状态/手机系统信息 交互的命名空间
+
+        ActivityUtils.addActivityLifecycleCallbacks(this, activityLifecycleCallbacks);
 
 //        webView.loadUrl("https://sdn.coolcollege.cn/assets/h5-photo-camera/index.html"); // 前端demo页
+        /*
+         合富辉煌：token=zKpCwDQMivdtzA6VDdCWy0bdhwd7R0/HjTM63bzx3cBjyUwbws0l51sNrcFZwIkb       enterpriseId：1324923316665978965
+         爱空间(熊师傅)：token=mkdT/mcuWn7J+IrhiJwSRLnru2pSHgntPKo3hO/OOaoIopPkupBBc8M+G3sF1ObrGWW/BpGLs8zp6jo2rkTRpw==    enterpriseId：1325057187583758354
+         */
         webView.loadUrl("https://app.coolcollege.cn?token=zKpCwDQMivdtzA6VDdCWy0bdhwd7R0/HjTM63bzx3cBjyUwbws0l51sNrcFZwIkb"); // 线上企业
 
         // 重写WebViewClient（否则webview的访问意图对象会被拒绝）
@@ -96,7 +107,7 @@ public class MainActivity extends Activity {
     public void nativeEvent(Object msg, CompletionHandler<String> handler){
         theHandler = handler;
         NativeEventParams params = new Gson().fromJson(msg.toString(), NativeEventParams.class);
-        APIModule.getAPIModule(this).moduleManage(params, entId, 123, new KXYCallback() {
+        APIModule.getAPIModule(this, MyApplication.get()).moduleManage(params, entId, 123, new KXYCallback() {
             // 不需要跳转页面的回调：通用上传uploadFile
             @Override
             public void onOKCallback(Object o) {
@@ -134,7 +145,7 @@ public class MainActivity extends Activity {
         NativeEventParams params = new NativeEventParams();
         params.methodName = "scan";
         params.methodData = "{}";
-        APIModule.getAPIModule(this).moduleManage(params, entId, 123, new KXYCallback() {
+        APIModule.getAPIModule(this, MyApplication.get()).moduleManage(params, entId, 123, new KXYCallback() {
             @Override
             public void onOKCallback(Object o) {
                 runOnUiThread(new Runnable() {
@@ -164,6 +175,46 @@ public class MainActivity extends Activity {
         });
     }
 
+    @JavascriptInterface
+    public void onActiveChange(Object data, CompletionHandler handler) {
+        handler.complete(data);
+    }
+
+    @JavascriptInterface
+    public void getSystemInfo(Object data, CompletionHandler handler) {
+        theHandler = handler;
+        NativeEventParams params = new NativeEventParams();
+        params.methodName = "getSystemInfo";
+        params.methodData = "{}";
+        APIModule.getAPIModule(this, MyApplication.get()).moduleManage(params, entId, 123, new KXYCallback() {
+            @Override
+            public void onOKCallback(Object o) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        ToastUtil.showToast(new Gson().toJson(o));
+                        HashMap<String, Object> params = new HashMap<>();
+                        params.put("result", o);
+                        theHandler.complete(new Gson().toJson(params));
+                    }
+                });
+            }
+
+            @Override
+            public void onErrorCallback(Object o) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        ToastUtil.showToast(new Gson().toJson(o));
+                        HashMap<String, Object> params = new HashMap<>();
+                        params.put("isError", true);
+                        params.put("error", o);
+                        theHandler.complete(new Gson().toJson(params));
+                    }
+                });
+            }
+        });
+    }
     private void settingsWebView() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             webView.setWebContentsDebuggingEnabled(true);
